@@ -1,41 +1,35 @@
 import os
 from docx import Document
 import openpyxl
+import json
+
+with open('path.json', 'r', encoding='utf-8') as f:  # открыли файл с данными
+    text = json.load(f)
 
 str1 = 'Продажа, Приемка_товара, Перемещение, Списание_товара'
 
 
-def generation_Word(type_oper, bd_index):
+def gen_edo(type_oper, bd_index):
+    path = text[type_oper]
+    wb = openpyxl.Workbook()
     document = Document()
-    if os.path.exists(f'documents\{type_oper}'):
-        print("Указанный файл существует")
-        document.save(f'documents\{type_oper}\{type_oper}_{bd_index}.docx')
-        os.startfile(f'documents\{type_oper}\{type_oper}_{bd_index}.docx', 'open')
+    if os.path.exists(path.split('\\')[0]):
+        pass
     else:
-        print("Файл не существует")
-        os.mkdir(f'documents\{type_oper}')
-        document.save(f'documents\{type_oper}\{type_oper}_{bd_index}.docx')
-        os.startfile(f'documents\{type_oper}\{type_oper}_{bd_index}.docx', 'open')
+        os.mkdir(path.split('\\')[0])
+    if os.path.exists(path):
+        pass
+    else:
+        os.mkdir(path)
+
+    wb.create_sheet(title=f'{type_oper}', index=0)
+    wb.remove(wb['Sheet'])
+    wb.save(f'{path}\\{bd_index}.xlsx')
+    os.startfile(f'{path}\\{bd_index}.xlsx', 'open')
+
+    document.save(f'{path}\\{bd_index}.docx')
+    os.startfile(f'{path}\\{bd_index}.docx', 'open')
 
 
 # generation_Word('Приемка_товара', 5)
-
-def generation_Excel(type_oper, bd_index):
-    wb = openpyxl.Workbook()
-    if os.path.exists(f'documents\{type_oper}'):
-        wb.create_sheet(title=f'{type_oper}', index=0)
-        wb.remove(wb['Sheet'])
-        # sheet = wb[f'{type_oper}']
-        print("Указанный файл существует")
-        wb.save(f'documents\{type_oper}\{type_oper}_{bd_index}.xlsx')
-        os.startfile(f'documents\{type_oper}\{type_oper}_{bd_index}.xlsx', 'open')
-    else:
-        print("Файл не существует")
-        os.mkdir(f'documents\{type_oper}')
-        wb.create_sheet(title=f'{type_oper}', index=0)
-        wb.remove(wb['Sheet'])
-        wb.save(f'documents\{type_oper}\{type_oper}_{bd_index}.docx')
-        os.startfile(f'documents\{type_oper}\{type_oper}_{bd_index}.docx', 'open')
-
-
-generation_Excel('Приемка_товара', 4)
+gen_edo('Приемка_товара', 8)
