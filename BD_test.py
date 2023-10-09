@@ -1,7 +1,6 @@
 import sqlite3
-from faker import Faker
-import random
 import datetime
+from faker import Faker
 
 fake = Faker()
 
@@ -54,7 +53,6 @@ cursor.execute('''
         code TEXT UNIQUE,
         description TEXT,
         expiration_date DATE,
-        image BLOB,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (category_id) REFERENCES ProductCategories(id),
@@ -223,7 +221,7 @@ products = [("Телефон", 1, 1, 1, "Телефон Samsung Galaxy", "12345"
             ("Футболка", 2, 2, 2, "Футболка размер M", "67890", "Красная футболка", None, None),
             ("Холодильник", 3, 3, 1, "Холодильник LG", "24680", "Двухкамерный холодильник", None, None)]
 for product in products:
-    cursor.execute("INSERT INTO Products (name, category_id, characteristic_id, manufacturer_id, code, description, expiration_date, image, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)", product)
+    cursor.execute("INSERT INTO Products (name, category_id, characteristic_id, manufacturer_id, supplier_id, code, description, expiration_date, image, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)", product)
 
 # Заполняем таблицу "Цены и Скидки"
 price_discounts = [(1, 1, 500, 0.1), (2, 2, 30, 0.05), (3, 1, 1000, 0.15)]
@@ -262,7 +260,8 @@ for item in order_items:
     cursor.execute("INSERT INTO OrderItems (order_id, product_id, quantity, price_per_unit, discount, total_price) VALUES (?, ?, ?, ?, ?, ?)", item)
 
 # Заполняем таблицу "Движение товаров"
-stock_movements = [(1, 1, 1, "поступление", 100, datetime.datetime.now()), (2, 2, 2, "отгрузка", 20, datetime.datetime.now())]
+stock_movements = [(1, 1, "поступление", 100, "2023-10-02 12:00:00"),
+                   (2, 2, "отгрузка", 20, "2023-08-09 18:00:00")]
 for movement in stock_movements:
     cursor.execute("INSERT INTO StockMovements (product_id, warehouse_id, movement_type, quantity, movement_date, created_at, updated_at) VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)", movement)
 
