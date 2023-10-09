@@ -2,11 +2,10 @@ import os
 from docx import Document
 import openpyxl
 import json
+from datetime import datetime
 
-with open('path.json', 'r', encoding='utf-8') as f:  # открыли файл с данными
+with open('path.json', 'r', encoding='utf-8') as f:
     text = json.load(f)
-
-str1 = 'Продажа, Приемка_товара, Перемещение, Списание_товара'
 
 
 def gen_edo(type_oper, bd_index):
@@ -21,14 +20,18 @@ def gen_edo(type_oper, bd_index):
         pass
     else:
         os.mkdir(path)
+    now = datetime.now()
+    date_creation = str(now)[:10]
 
     wb.create_sheet(title=f'{type_oper}', index=0)
     wb.remove(wb['Sheet'])
-    wb.save(f'{path}\\{bd_index}.xlsx')
-    os.startfile(f'{path}\\{bd_index}.xlsx', 'open')
+    wb.save(f'{path}\\№_{bd_index}_{date_creation}.xlsx')
+    os.startfile(f'{path}\\№_{bd_index}_{date_creation}.xlsx', 'open')
+    #  sql запрос на создание записи в бд
 
-    document.save(f'{path}\\{bd_index}.docx')
-    os.startfile(f'{path}\\{bd_index}.docx', 'open')
+    document.save(f'{path}\\№_{bd_index}_{date_creation}.docx')
+    os.startfile(f'{path}\\№_{bd_index}_{date_creation}.docx', 'open')
+    #  sql запрос на создание записи в бд
 
 
 # generation_Word('Приемка_товара', 5)
