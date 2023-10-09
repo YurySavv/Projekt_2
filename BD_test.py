@@ -217,11 +217,12 @@ for supplier in suppliers:
     cursor.execute("INSERT INTO Suppliers (name, contact_info) VALUES (?, ?)", supplier)
 
 # Заполняем таблицу "Товары"
-products = [("Телефон", 1, 1, 1, "Телефон Samsung Galaxy", "12345", "Смартфон", None, None),
-            ("Футболка", 2, 2, 2, "Футболка размер M", "67890", "Красная футболка", None, None),
-            ("Холодильник", 3, 3, 1, "Холодильник LG", "24680", "Двухкамерный холодильник", None, None)]
+products = [("Телефон", 1, 1, 1, 1, "12345", "Смартфон", datetime.date(2023, 12, 31)),
+           ("Футболка", 2, 2, 2, 2, "67890", "Красная футболка", datetime.date(2023, 12, 31)),
+           ("Холодильник", 3, 3, 1, 2, "24680", "Двухкамерный холодильник", datetime.date(2023, 12, 31))]
 for product in products:
-    cursor.execute("INSERT INTO Products (name, category_id, characteristic_id, manufacturer_id, supplier_id, code, description, expiration_date, image, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)", product)
+    cursor.execute("INSERT INTO Products (name, category_id, characteristic_id, manufacturer_id, supplier_id, code, description, expiration_date, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)", product)
+
 
 # Заполняем таблицу "Цены и Скидки"
 price_discounts = [(1, 1, 500, 0.1), (2, 2, 30, 0.05), (3, 1, 1000, 0.15)]
@@ -260,11 +261,15 @@ for item in order_items:
     cursor.execute("INSERT INTO OrderItems (order_id, product_id, quantity, price_per_unit, discount, total_price) VALUES (?, ?, ?, ?, ?, ?)", item)
 
 # Заполняем таблицу "Движение товаров"
-stock_movements = [(1, 1, "поступление", 100, "2023-10-02 12:00:00"),
-                   (2, 2, "отгрузка", 20, "2023-08-09 18:00:00")]
+stock_movements = [
+    (1, 1, "поступление", 100, "2023-07-18 12:00:00", "2023-10-02 14:35:00", "2023-08-05 10:10:00"),
+    (2, 2, "отгрузка", 20, "2023-08-09 12:00:00", "2023-09-02 10:25:00", "2023-06-15 10:25:00")
+]
 for movement in stock_movements:
-    cursor.execute("INSERT INTO StockMovements (product_id, warehouse_id, movement_type, quantity, movement_date, created_at, updated_at) VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)", movement)
-
+    cursor.execute(
+        "INSERT INTO StockMovements (product_id, warehouse_id, movement_type, quantity, movement_date, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
+        movement
+    )
 # Заполняем таблицу "Остатки товаров"
 stock_balances = [(1, 1, 80, datetime.date.today()), (2, 2, 30, datetime.date.today())]
 for balance in stock_balances:
@@ -280,3 +285,5 @@ conn.commit()
 
 # Закрываем соединение с базой данных
 conn.close()
+
+print("База данных успешно создана.")
