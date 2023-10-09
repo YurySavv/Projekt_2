@@ -1,41 +1,38 @@
 import os
 from docx import Document
 import openpyxl
+import json
+from datetime import datetime
 
-str1 = 'Продажа, Приемка_товара, Перемещение, Списание_товара'
+with open('path.json', 'r', encoding='utf-8') as f:
+    text = json.load(f)
 
 
-def generation_Word(type_oper, bd_index):
+def gen_edo(type_oper, bd_index):
+    path = text[type_oper]
+    wb = openpyxl.Workbook()
     document = Document()
-    if os.path.exists(f'documents\{type_oper}'):
-        print("Указанный файл существует")
-        document.save(f'documents\{type_oper}\{type_oper}_{bd_index}.docx')
-        os.startfile(f'documents\{type_oper}\{type_oper}_{bd_index}.docx', 'open')
+    if os.path.exists(path.split('\\')[0]):
+        pass
     else:
-        print("Файл не существует")
-        os.mkdir(f'documents\{type_oper}')
-        document.save(f'documents\{type_oper}\{type_oper}_{bd_index}.docx')
-        os.startfile(f'documents\{type_oper}\{type_oper}_{bd_index}.docx', 'open')
+        os.mkdir(path.split('\\')[0])
+    if os.path.exists(path):
+        pass
+    else:
+        os.mkdir(path)
+    now = datetime.now()
+    date_creation = str(now)[:10]
+
+    wb.create_sheet(title=f'{type_oper}', index=0)
+    wb.remove(wb['Sheet'])
+    wb.save(f'{path}\\№_{bd_index}_{date_creation}.xlsx')
+    os.startfile(f'{path}\\№_{bd_index}_{date_creation}.xlsx', 'open')
+    #  sql запрос на создание записи в бд
+
+    document.save(f'{path}\\№_{bd_index}_{date_creation}.docx')
+    os.startfile(f'{path}\\№_{bd_index}_{date_creation}.docx', 'open')
+    #  sql запрос на создание записи в бд
 
 
 # generation_Word('Приемка_товара', 5)
-
-def generation_Excel(type_oper, bd_index):
-    wb = openpyxl.Workbook()
-    if os.path.exists(f'documents\{type_oper}'):
-        wb.create_sheet(title=f'{type_oper}', index=0)
-        wb.remove(wb['Sheet'])
-        # sheet = wb[f'{type_oper}']
-        print("Указанный файл существует")
-        wb.save(f'documents\{type_oper}\{type_oper}_{bd_index}.xlsx')
-        os.startfile(f'documents\{type_oper}\{type_oper}_{bd_index}.xlsx', 'open')
-    else:
-        print("Файл не существует")
-        os.mkdir(f'documents\{type_oper}')
-        wb.create_sheet(title=f'{type_oper}', index=0)
-        wb.remove(wb['Sheet'])
-        wb.save(f'documents\{type_oper}\{type_oper}_{bd_index}.docx')
-        os.startfile(f'documents\{type_oper}\{type_oper}_{bd_index}.docx', 'open')
-
-
-generation_Excel('Приемка_товара', 4)
+gen_edo('Приемка_товара', 8)
