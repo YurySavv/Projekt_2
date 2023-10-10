@@ -25,6 +25,8 @@ conn = sqlite3.connect('inventory_management.db')
 
 
 def gen_edo(type_oper, list_data, employee_id):
+    if type(list_data[0]) != list:
+        list_data = [list_data]
     with conn:
         bd_index = conn.execute('SELECT COUNT(*) FROM Documents').fetchone()[0]
 
@@ -117,8 +119,21 @@ ________________________________
             moving.write(json.dumps(dict_moving))
 
 
+documets_from_type = {'Счет-фактура': 'Продажа', 'Накладная': 'Приемка_товара', 'Акт перемещения': 'Перемещение',
+                      'Акт списания': 'Списание товара'}
+
+
+def open_file(id_document):
+    with conn:
+        doc_name = conn.execute(f'SELECT content, type FROM Documents WHERE id ={id_document}').fetchone()
+    type_oper = documets_from_type[doc_name[1]]
+    path = text[type_oper]
+    os.startfile(f'{path}\\{doc_name[0]}', 'open')
+
+
 # generation_Word('Приемка_товара', 5)
 # list_data1 = [['Телефон', 2, 4, 8, 'Рога и копыта', 15],
-#               ['Стулья', 5, 4, 20, 'Рога и копыта', 16]]
+#               ['Стулья', 5, 4, 20, 'Рога и копыта', 16]]       9
 # #
+# # list_data1 = ['Телефон', 2, 4, 8, 'Рога и копыта', 15]
 # gen_edo('Приемка_товара', list_data1, 5)
