@@ -3,7 +3,7 @@ from functools import partial
 
 
 con = sl.connect('st10.db')
-
+# con = sl.connect('inventory_management.db')
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
@@ -33,6 +33,32 @@ d1 = {'Choose_operation': [['QLineEdit', '', '', 'text()'],
                             ['QComboBox', 'name', 'Warehouses', 'currentText()']],
       }
 
+# d1 = {
+#     'ProductCategories': [['QLineEdit', 'name', 'ProductCategories', 'text()']],
+#     'ProductCharacteristics': [['QLineEdit', 'name', 'ProductCharacteristics', 'text()']],
+#     'Products': [['QLineEdit', 'category_id', 'ProductCategories', 'text()'],
+#                  ['QLineEdit', 'characteristic_id', 'ProductCharacteristics', 'text()'],
+#                  ['QLineEdit', 'name', 'Products', 'text()'],
+#                  ['QLineEdit', 'code', 'Products', 'text()'],
+#                  ['QDateEdit', 'expiration_date', 'Products', 'date().toString("yyyy-MM-dd")']],
+#     'Warehouses': [['QLineEdit', 'address', 'Warehouses', 'text()'],
+#                    ['QLineEdit', 'name', 'Warehouses', 'text()'],
+#                    ['QLineEdit', 'location_text', 'Warehouses', 'text()'],
+#                    ['QLineEdit', 'location_coordinates', 'Warehouses', 'text()']],
+#     'Choose_operation': [['QLineEdit', '', '', 'text()'],
+#                    ['QLineEdit', '', '', 'text()'],
+#                    ['QDateEdit', '', '', 'text()'],
+#                    ['QLineEdit', '', '', 'text()'],
+#                    ['QComboBox', 'name', 'Orders', 'currentText()']],
+#     'Clients': [['QLineEdit', 'name', 'Clients', 'text()'],
+#                 ['QLineEdit', 'contact_info', 'Clients', 'text()']],
+#     'Orders': [['QLineEdit', 'client_id', 'Clients', 'text()'],
+#                ['QDateEdit', 'date', 'Orders', 'date().toString("yyyy-MM-dd")']],
+#     'OrderItems': [['QLineEdit', 'order_id', 'Orders', 'text()'],
+#                    ['QLineEdit', 'product_id', 'Products', 'text()'],
+#                    ['QLineEdit', 'quantity', 'OrderItems', 'text()']],
+#     'Documents': [['QLineEdit', 'type', 'Documents', 'text()'],
+#                   ['QLineEdit', 'content', 'Documents', 'text()']]
 
 # словарь координат
 dict_coord = {0: [[50, 50, 51, 20], []], 1: [[260, 50, 170, 21], [260, 90, 171, 30]],
@@ -40,13 +66,62 @@ dict_coord = {0: [[50, 50, 51, 20], []], 1: [[260, 50, 170, 21], [260, 90, 171, 
               3: [[50, 200, 170, 21], [50, 240, 141, 30]],
               4: [[260, 200, 170, 21], [260, 240, 170, 30]]}
 
-# class Ui_Dialog_2(object):
-#     table_name = 'Orders'
-#     row = 0
-
+class Ui_Dialog_2(object):
+    table_name = 'Orders'
+    row = 0
+# def choose_operation_dialog(self):
+    #     operation_dialog = QDialog()
+    #     operation_dialog.setWindowTitle("Выберите операцию")
+    #     operation_dialog.setGeometry(300, 300, 300, 150)
+    #
+    #     sale_button = QtWidgets.QPushButton("Продажа", operation_dialog)
+    #     sale_button.setGeometry(50, 30, 75, 30)
+    #
+    #     receiving_button = QtWidgets.QPushButton("Приемка товара", operation_dialog)
+    #     receiving_button.setGeometry(150, 30, 120, 30)
+    #
+    #     transfer_button = QtWidgets.QPushButton("Перемещение", operation_dialog)
+    #     transfer_button.setGeometry(50, 70, 90, 30)
+    #
+    #     write_off_button = QtWidgets.QPushButton("Списание", operation_dialog)
+    #     write_off_button.setGeometry(150, 70, 80, 30)
+    #
+    #     sale_button.clicked.connect(self.handle_sale)
+    #     receiving_button.clicked
+    #     connect(self.handle_receiving)
+    #     transfer_button.clicked.connect(self.handle_transfer)
+    #     write_off_button.clicked.connect(self.handle_write_off)
+    #
+    #     operation_dialog.exec_()
+    #
+    # def handle_sale(self):
+    #     print("Выбрана операция 'Продажа'")
+    #
+    # def handle_receiving(self):
+    #     print("Выбрана операция 'Приемка товара'")
+    #
+    # def handle_transfer(self):
+    #     print("Выбрана операция 'Перемещение'")
+    #
+    # def handle_write_off(self):
+    #     print("Выбрана операция 'Списание'")
 
 class Ui_Dialog(object):
     table_name = 'Choose_operation'
+
+    # self.pushButton_choose_operation = QtWidgets.QPushButton(Dialog)
+    # self.pushButton_choose_operation.setGeometry(QtCore.QRect(710, 160, 141, 31))
+    # self.pushButton_choose_operation.setObjectName("pushButton_choose_operation")
+    # self.pushButton_choose_operation.setText("Выбрать операцию")
+    # self.pushButton_choose_operation.clicked.connect(self.show_choose_operation_dialog)
+
+    # def show_choose_operation_dialog(self):
+    #     choose_operation_dialog = ChooseOperationDialog()
+    #     result = choose_operation_dialog.exec_()  # Отобразить диалоговое окно!
+    #     if result == QtWidgets.QDialog.Accepted:
+    #
+    #         pass
+
 
     # функция которая задает названия колонкам
     def sql_fighter(self, table_name):
