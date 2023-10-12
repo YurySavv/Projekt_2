@@ -9,7 +9,7 @@
 import sqlite3 as sl
 from functools import partial
 from PyQt5 import QtCore, QtGui, QtWidgets
-from edo import gen_edo
+from edo import gen_edo, open_file
 
 con = sl.connect('inventory_management.db')
 
@@ -48,6 +48,8 @@ d1 = {
                         ['QTextEdit', '', '', 'toPlainText()'],
                         ['QComboBox', 'name', 'Warehouses', 'currentText()']],
 }
+type_documets = {'Продажа': 'Счет-фактура', 'Приемка_товара': 'Накладная', 'Перемещение': 'Акт перемещения',
+                 'Списание_товара': 'Акт списания'}
 
 dict_coord = {0: [[70, 20, 100, 40], [70, 50, 201, 22]],
               1: [[70, 90, 100, 13], [70, 120, 201, 22]],
@@ -56,10 +58,71 @@ dict_coord = {0: [[70, 20, 100, 40], [70, 50, 201, 22]],
               4: [[70, 240, 100, 13], [70, 260, 201, 22]],
               5: [[70, 290, 100, 13], [70, 320, 201, 22]]}
 
+dict_coord_m = {0: [[80, 50, 111, 31], [60, 170, 111, 31], [60, 140, 111, 31]],
+                1: [[270, 50, 111, 31], [250, 170, 111, 31], [250, 140, 111, 31]],
+                2: [[460, 50, 111, 31], [440, 170, 111, 31], [440, 140, 111, 31]],
+                3: [[640, 50, 111, 31], [620, 170, 111, 31], [620, 140, 111, 31]]}
+
 
 class Ui_Dialog(object):
+    def setupUi(self, Dialog):
+        Dialog.setObjectName("Dialog")
+        Dialog.resize(824, 273)
+        for x1 in dict_coord_m.keys():
+            a = f"""
+self.QLabel_{x1} = QtWidgets.QLabel(Dialog)
+self.QLabel_{x1}.setGeometry(QtCore.QRect({dict_coord_m[x1][0][0]},{dict_coord_m[x1][0][1]},{dict_coord_m[x1][0][2]},{dict_coord_m[x1][0][3]}))
+self.QLabel_{x1}.setObjectName("label_{x1}")
+
+self.QPushButton_{x1} = QtWidgets.QPushButton(Dialog)
+self.QPushButton_{x1}.setGeometry(QtCore.QRect({dict_coord_m[x1][1][0]},{dict_coord_m[x1][1][1]},{dict_coord_m[x1][1][2]},{dict_coord_m[x1][1][3]}))
+self.QPushButton_{x1}.setObjectName("pushButton_{x1}")
+
+self.QPushButton_{x1+4} = QtWidgets.QPushButton(Dialog)
+self.QPushButton_{x1+4}.setGeometry(QtCore.QRect({dict_coord_m[x1][2][0]},{dict_coord_m[x1][2][1]},{dict_coord_m[x1][2][2]},{dict_coord_m[x1][2][3]}))
+self.QPushButton_{x1+4}.setObjectName("pushButton_{x1+4}")
+        """
+            exec(a)
+
+        self.retranslateUi(Dialog)
+        QtCore.QMetaObject.connectSlotsByName(Dialog)
+
+    def retranslateUi(self, Dialog):
+        _translate = QtCore.QCoreApplication.translate
+        Dialog.setWindowTitle(_translate("Dialog", "Dialog"))
+        for x2 in range(len(list(d1.keys()))):
+            a1 = f""" 
+self.QLabel_{x2}.setText(_translate("Dialog", list(d1.keys())[{x2}]))
+self.QPushButton_{x2}.setText(_translate("Dialog", "Создание"))
+self.QPushButton_{x2}.clicked.connect(Dialog.close)
+self.QPushButton_{x2}.clicked.connect(partial(self.add_edo, f'{list(d1.keys())[x2]}'))
+self.QPushButton_{x2+4}.setText(_translate("Dialog", "Просмотр"))
+self.QPushButton_{x2+4}.clicked.connect(Dialog.close)
+self.QPushButton_{x2+4}.clicked.connect(partial(self.show_table, "Documents",f'{list(d1.keys())[x2]}'))
+"""
+            exec(a1)
+
+    def add_edo(self, arg1):
+        Dialog = QtWidgets.QDialog()
+        ui_table = Ui_Dialog_1()
+        ui_table.table_name = arg1
+        ui_table.setupUi(Dialog)
+        Dialog.show()
+        Dialog.exec_()
+
+    def show_table(self, arg1, arg2):
+        Dialog = QtWidgets.QDialog()
+        ui_table = Ui_Dialog_2()
+        ui_table.table_name = arg1
+        ui_table.column = arg2
+        ui_table.setupUi(Dialog)
+        Dialog.show()
+        Dialog.exec_()
+
+
+class Ui_Dialog_1(object):
     table_name = 'Списание_товара'
-    list_rows =[]
+    list_rows = []
 
     def setupUi(self, Dialog):
         Dialog.setObjectName("Dialog")
@@ -97,11 +160,14 @@ with con:
         self.pushButton.setGeometry(QtCore.QRect(120, 440, 75, 23))
         self.pushButton.setObjectName("pushButton")
         self.pushButton_2 = QtWidgets.QPushButton(Dialog)
-        self.pushButton_2.setGeometry(QtCore.QRect(490, 440, 150, 23))
+        self.pushButton_2.setGeometry(QtCore.QRect(550, 440, 150, 23))
         self.pushButton_2.setObjectName("pushButton_2")
         self.pushButton_3 = QtWidgets.QPushButton(Dialog)
         self.pushButton_3.setGeometry(QtCore.QRect(340, 440, 75, 23))
         self.pushButton_3.setObjectName("pushButton_3")
+        self.pushButton_4 = QtWidgets.QPushButton(Dialog)
+        self.pushButton_4.setGeometry(QtCore.QRect(340, 550, 75, 23))
+        self.pushButton_4.setObjectName("pushButton_3")
         self.tableWidget = QtWidgets.QTableWidget(Dialog)
         self.tableWidget.setGeometry(QtCore.QRect(340, 40, 500, 311))
         self.tableWidget.setObjectName("tableWidget")
@@ -122,6 +188,18 @@ self.QLabel_{x2}.setText(_translate("Dialog", label_dict[self.table_name][{x2}])
         self.pushButton_2.clicked.connect(self.add_edo)
         self.pushButton_3.setText(_translate("Dialog", "Удалить"))
         self.pushButton_3.clicked.connect(self.sql_del)
+        self.pushButton_4.setText(_translate("Dialog", "Назад"))
+        self.pushButton_4.clicked.connect(Dialog.close)
+        self.pushButton_4.clicked.connect(partial(self.table_dialog))
+
+    def table_dialog(self):
+        Dialog = QtWidgets.QDialog()
+        ui_table = Ui_Dialog()
+        ui_table.setupUi(Dialog)
+        Dialog.show()
+        Dialog.exec_()
+
+
 
     def add_edo(self):
         try:
@@ -129,18 +207,20 @@ self.QLabel_{x2}.setText(_translate("Dialog", label_dict[self.table_name][{x2}])
         except:
             pass
 
-
-    def sql_del(self): # удаление строки из таблицы
+    def sql_del(self):  # удаление строки из таблицы
         row = self.tableWidget.currentRow()
         if self.table_name == 'Приемка_товара':
             with con:
-                warehous_id = con.execute(f'SELECT id FROM Warehouses WHERE name ="{self.list_rows[row][5]}"').fetchone()[0]
+                warehous_id = \
+                con.execute(f'SELECT id FROM Warehouses WHERE name ="{self.list_rows[row][5]}"').fetchone()[0]
                 con.execute(
                     f'UPDATE StockBalances SET quantity = quantity-{self.list_rows[row][1]} WHERE warehouse_id = {warehous_id}')
         else:
             with con:
-                warehous_id = con.execute(f'SELECT id FROM Warehouses WHERE name ="{self.list_rows[row][5]}"').fetchone()[0]
-                con.execute(f'UPDATE StockBalances SET quantity = quantity+{self.list_rows[row][1]} WHERE warehouse_id = {warehous_id}')
+                warehous_id = \
+                con.execute(f'SELECT id FROM Warehouses WHERE name ="{self.list_rows[row][5]}"').fetchone()[0]
+                con.execute(
+                    f'UPDATE StockBalances SET quantity = quantity+{self.list_rows[row][1]} WHERE warehouse_id = {warehous_id}')
         self.list_rows.pop(row)
         if row > -1:
             self.tableWidget.removeRow(row)
@@ -160,11 +240,13 @@ self.{d1[self.table_name][ik][0]}_{ik}.{d1[self.table_name][ik][3]}
         if self.table_name == 'Приемка_товара':
             with con:
                 warehous_id = con.execute(f'SELECT id FROM Warehouses WHERE name ="{list_data[0][5]}"').fetchone()[0]
-                con.execute(f'UPDATE StockBalances SET quantity = quantity+{list_data[0][1]} WHERE warehouse_id = {warehous_id}')
+                con.execute(
+                    f'UPDATE StockBalances SET quantity = quantity+{list_data[0][1]} WHERE warehouse_id = {warehous_id}')
         else:
             with con:
                 warehous_id = con.execute(f'SELECT id FROM Warehouses WHERE name ="{list_data[0][5]}"').fetchone()[0]
-                con.execute(f'UPDATE StockBalances SET quantity = quantity-{list_data[0][1]} WHERE warehouse_id = {warehous_id}')
+                con.execute(
+                    f'UPDATE StockBalances SET quantity = quantity-{list_data[0][1]} WHERE warehouse_id = {warehous_id}')
         self.tableWidget.setColumnCount(len(label_dict[self.table_name]))
         for row in range(len(list_data)):  # генерация таблицы
             self.tableWidget.insertRow(row)
@@ -196,9 +278,108 @@ self.{d1[self.table_name][ik][0]}_{ik}.{d1[self.table_name][ik][3]}
                     self.QComboBox_5.addItem(str(warehous[0]))
                 self.QSpinBox_1.setMaximum(max_quant)
 
-    def total_price(self, value): # метод выставления стоимости
+    def total_price(self, value):  # метод выставления стоимости
         price = float(self.QTextEdit_2.toPlainText())
         self.QTextEdit_3.setText(str(price * value))
+
+
+class Ui_Dialog_2(object):
+    table_name = 'Employee'
+    column = ''
+
+    # функция которая задает названия колонкам
+    def sql_fighter(self, table_name):
+        table_name = self.table_name
+        param_list = []
+        with con:
+            cur = con.cursor()
+            cur.execute(f'PRAGMA table_info({table_name}) ')
+            data = cur.fetchall()
+            for d in data:
+                param_list.append(d[1])
+        return param_list
+
+    def open_file(self):
+        row = self.tableWidget.currentRow()
+        item = self.tableWidget.item(row, 0)
+        item = int(item.text())
+        open_file(item)
+
+
+    # функция вытягивания данных для записи их в окно в таблицу
+    def get_sql(self):
+        table_name = self.table_name
+        with con:
+            data = con.execute(f'SELECT * FROM {table_name} WHERE type="{type_documets[self.column]}"')
+            return data.fetchall()
+
+    # функция удаления записей из таблицы
+    def sql_del(self):
+        table_name = self.table_name
+        row = self.tableWidget.currentRow()
+        item = self.tableWidget.item(row, 0)
+        item = int(item.text())
+        if row > -1:
+            self.tableWidget.removeRow(row)
+            self.tableWidget.selectionModel().clearCurrentIndex()
+        with con:
+            con.execute(f'DELETE FROM {table_name} WHERE id = {item}')
+
+    def setupUi(self, Dialog):
+        Dialog.setObjectName("Dialog")
+        Dialog.resize(900, 600)
+        self.tableWidget = QtWidgets.QTableWidget(Dialog)
+        self.tableWidget.setGeometry(QtCore.QRect(30, 50, 550, 500))
+        self.tableWidget.setObjectName("tableWidget")
+        self.tableWidget.setColumnCount(len(self.sql_fighter(self.table_name)))
+        self.tableWidget.setHorizontalHeaderLabels(self.sql_fighter(self.table_name))
+        for row in range(len(self.get_sql())):  # генерация таблицы
+            self.tableWidget.insertRow(row)
+            self.row = row
+            for column in range(len(self.get_sql()[row])):
+                item = QtWidgets.QTableWidgetItem(str(self.get_sql()[row][column]))
+                self.tableWidget.setItem(row, column, item)
+
+        self.pushButton_1 = QtWidgets.QPushButton(Dialog)
+        self.pushButton_1.setGeometry(QtCore.QRect(710, 160, 141, 31))
+        self.pushButton_1.setObjectName("pushButton_2")
+        self.pushButton_2 = QtWidgets.QPushButton(Dialog)
+        self.pushButton_2.setGeometry(QtCore.QRect(710, 60, 141, 31))
+        self.pushButton_2.setObjectName("pushButton_2")
+        self.pushButton_3 = QtWidgets.QPushButton(Dialog)
+        self.pushButton_3.setGeometry(QtCore.QRect(710, 110, 141, 31))
+        self.pushButton_3.setObjectName("pushButton_3")
+
+        self.retranslateUi(Dialog)
+        QtCore.QMetaObject.connectSlotsByName(Dialog)
+
+    def retranslateUi(self, Dialog):
+        _translate = QtCore.QCoreApplication.translate
+        Dialog.setWindowTitle(_translate("Dialog", f'{self.table_name}'))
+        self.pushButton_1.setText(_translate("Dialog", "Открыть"))
+        self.pushButton_1.clicked.connect(self.open_file)
+        self.pushButton_2.setText(_translate("Dialog", "Назад"))
+        self.pushButton_2.clicked.connect(Dialog.close)
+        self.pushButton_2.clicked.connect(partial(self.edo_main))
+        self.pushButton_3.setText(_translate("Dialog", "Удалить"))
+        self.pushButton_3.clicked.connect(self.sql_del)
+
+        # self.pushButton.clicked.connect(self.restart)
+
+
+
+
+    # функция для передачи данных через кнопку, в данном случае передается название таблицы
+    def edo_main(self):
+        Dialog = QtWidgets.QDialog()
+        ui_table = Ui_Dialog()
+        ui_table.setupUi(Dialog)
+
+        Dialog.show()
+        Dialog.exec_()
+
+
+
 
 
 if __name__ == "__main__":

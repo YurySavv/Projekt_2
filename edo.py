@@ -123,7 +123,7 @@ documets_from_type = {'Счет-фактура': 'Продажа', 'Наклад
                       'Акт списания': 'Списание_товара'}
 
 
-def open_file(id_document):
+def open_file(id_document):  # нужен id документа в БД
     with conn:
         doc_name = conn.execute(f'SELECT content, type FROM Documents WHERE id ={id_document}').fetchone()
     type_oper = documets_from_type[doc_name[1]]
