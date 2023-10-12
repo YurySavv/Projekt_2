@@ -59,6 +59,7 @@ dict_coord = {0: [[70, 20, 100, 40], [70, 50, 201, 22]],
 
 class Ui_Dialog(object):
     table_name = 'Списание_товара'
+    list_rows =[]
 
     def setupUi(self, Dialog):
         Dialog.setObjectName("Dialog")
@@ -118,17 +119,34 @@ self.QLabel_{x2}.setText(_translate("Dialog", label_dict[self.table_name][{x2}])
         self.pushButton.setText(_translate("Dialog", "Добавить"))
         self.pushButton.clicked.connect(self.add_row)
         self.pushButton_2.setText(_translate("Dialog", "Создать документ"))
-        # self.pushButton_2.clicked.connect(gen_edo(self.table_name, list_data, 6))
+        self.pushButton_2.clicked.connect(self.add_edo)
         self.pushButton_3.setText(_translate("Dialog", "Удалить"))
         self.pushButton_3.clicked.connect(self.sql_del)
 
-    def sql_del(self):
+    def add_edo(self):
+        try:
+            gen_edo(self.table_name, self.list_rows, 6)
+        except:
+            pass
+
+
+    def sql_del(self): # удаление строки из таблицы
         row = self.tableWidget.currentRow()
+        if self.table_name == 'Приемка_товара':
+            with con:
+                warehous_id = con.execute(f'SELECT id FROM Warehouses WHERE name ="{self.list_rows[row][5]}"').fetchone()[0]
+                con.execute(
+                    f'UPDATE StockBalances SET quantity = quantity-{self.list_rows[row][1]} WHERE warehouse_id = {warehous_id}')
+        else:
+            with con:
+                warehous_id = con.execute(f'SELECT id FROM Warehouses WHERE name ="{self.list_rows[row][5]}"').fetchone()[0]
+                con.execute(f'UPDATE StockBalances SET quantity = quantity+{self.list_rows[row][1]} WHERE warehouse_id = {warehous_id}')
+        self.list_rows.pop(row)
         if row > -1:
             self.tableWidget.removeRow(row)
             self.tableWidget.selectionModel().clearCurrentIndex()
 
-    def add_row(self):
+    def add_row(self):  # генерация таблицы
         list_data = []
         for ik in range(len(d1[self.table_name])):
             a1 = f"""
@@ -137,7 +155,16 @@ self.{d1[self.table_name][ik][0]}_{ik}.{d1[self.table_name][ik][3]}
 
             c1 = eval(a1)
             list_data.append(c1)
+        self.list_rows.insert(0, list_data)  # список для создания документов
         list_data = [list_data]
+        if self.table_name == 'Приемка_товара':
+            with con:
+                warehous_id = con.execute(f'SELECT id FROM Warehouses WHERE name ="{list_data[0][5]}"').fetchone()[0]
+                con.execute(f'UPDATE StockBalances SET quantity = quantity+{list_data[0][1]} WHERE warehouse_id = {warehous_id}')
+        else:
+            with con:
+                warehous_id = con.execute(f'SELECT id FROM Warehouses WHERE name ="{list_data[0][5]}"').fetchone()[0]
+                con.execute(f'UPDATE StockBalances SET quantity = quantity-{list_data[0][1]} WHERE warehouse_id = {warehous_id}')
         self.tableWidget.setColumnCount(len(label_dict[self.table_name]))
         for row in range(len(list_data)):  # генерация таблицы
             self.tableWidget.insertRow(row)
@@ -145,9 +172,10 @@ self.{d1[self.table_name][ik][0]}_{ik}.{d1[self.table_name][ik][3]}
             for column in range(len(list_data[row])):
                 item = QtWidgets.QTableWidgetItem(str(list_data[row][column]))
                 self.tableWidget.setItem(row, column, item)
+
         # sql запросы не забудь
 
-    def price(self, value):
+    def price(self, value):  # метод выставления цены от товара
         self.QComboBox_5.clear()
         with con:
             price = con.execute(f'''SELECT price FROM PriceDiscounts INNER JOIN Products ON PriceDiscounts.product_id 
@@ -168,7 +196,7 @@ self.{d1[self.table_name][ik][0]}_{ik}.{d1[self.table_name][ik][3]}
                     self.QComboBox_5.addItem(str(warehous[0]))
                 self.QSpinBox_1.setMaximum(max_quant)
 
-    def total_price(self, value):
+    def total_price(self, value): # метод выставления стоимости
         price = float(self.QTextEdit_2.toPlainText())
         self.QTextEdit_3.setText(str(price * value))
 
