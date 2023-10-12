@@ -64,7 +64,7 @@ dict_coord_m = {0: [[80, 50, 111, 31], [60, 170, 111, 31], [60, 140, 111, 31]],
                 3: [[640, 50, 111, 31], [620, 170, 111, 31], [620, 140, 111, 31]]}
 
 
-class Ui_Dialog(object):
+class Ui_Dialog_edo(object):
     def setupUi(self, Dialog):
         Dialog.setObjectName("Dialog")
         Dialog.resize(824, 273)
@@ -104,7 +104,7 @@ self.QPushButton_{x2+4}.clicked.connect(partial(self.show_table, "Documents",f'{
 
     def add_edo(self, arg1):
         Dialog = QtWidgets.QDialog()
-        ui_table = Ui_Dialog_1()
+        ui_table = Ui_Dialog_edo_1()
         ui_table.table_name = arg1
         ui_table.setupUi(Dialog)
         Dialog.show()
@@ -112,7 +112,7 @@ self.QPushButton_{x2+4}.clicked.connect(partial(self.show_table, "Documents",f'{
 
     def show_table(self, arg1, arg2):
         Dialog = QtWidgets.QDialog()
-        ui_table = Ui_Dialog_2()
+        ui_table = Ui_Dialog_edo_2()
         ui_table.table_name = arg1
         ui_table.column = arg2
         ui_table.setupUi(Dialog)
@@ -120,7 +120,7 @@ self.QPushButton_{x2+4}.clicked.connect(partial(self.show_table, "Documents",f'{
         Dialog.exec_()
 
 
-class Ui_Dialog_1(object):
+class Ui_Dialog_edo_1(object):
     table_name = 'Списание_товара'
     list_rows = []
 
@@ -194,7 +194,7 @@ self.QLabel_{x2}.setText(_translate("Dialog", label_dict[self.table_name][{x2}])
 
     def table_dialog(self):
         Dialog = QtWidgets.QDialog()
-        ui_table = Ui_Dialog()
+        ui_table = Ui_Dialog_edo()
         ui_table.setupUi(Dialog)
         Dialog.show()
         Dialog.exec_()
@@ -283,7 +283,7 @@ self.{d1[self.table_name][ik][0]}_{ik}.{d1[self.table_name][ik][3]}
         self.QTextEdit_3.setText(str(price * value))
 
 
-class Ui_Dialog_2(object):
+class Ui_Dialog_edo_2(object):
     table_name = 'Employee'
     column = ''
 
@@ -372,7 +372,7 @@ class Ui_Dialog_2(object):
     # функция для передачи данных через кнопку, в данном случае передается название таблицы
     def edo_main(self):
         Dialog = QtWidgets.QDialog()
-        ui_table = Ui_Dialog()
+        ui_table = Ui_Dialog_edo()
         ui_table.setupUi(Dialog)
 
         Dialog.show()
@@ -387,7 +387,7 @@ if __name__ == "__main__":
 
     app = QtWidgets.QApplication(sys.argv)
     Dialog = QtWidgets.QDialog()
-    ui = Ui_Dialog()
+    ui = Ui_Dialog_edo()
     ui.setupUi(Dialog)
     Dialog.show()
     sys.exit(app.exec_())
