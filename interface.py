@@ -117,26 +117,29 @@ class TableDialog(QtWidgets.QDialog):
         self.setLayout(layout)
 
     def delete_item(self):
-        reply = QtWidgets.QMessageBox.question(self, 'Удалить запись', 'Вы уверены, что хотите удалить запись?',
-                                               QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
-                                               QtWidgets.QMessageBox.No)
+        selected_indexes = self.table_widget.selectionModel().selectedIndexes()
+        if not selected_indexes:
+            return
 
-        if reply == QtWidgets.QMessageBox.Yes:
-            selected_rows = self.table_widget.selectionModel().selectedRows()
-            if not selected_rows:
-                return
+        row = selected_indexes[0].row()
+        item_id = self.data[row][0]  # Assuming the first column is the ID
+        confirm_dialog = QtWidgets.QMessageBox.question(self, 'Подтверждение удаления',
+                                                        f'Вы уверены, что хотите удалить запись с ID {item_id}?',
+                                                        QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
+                                                        QtWidgets.QMessageBox.No)
 
-            item_id = self.data[selected_rows[0].row()][0]  # !!! первый столбец id
+        if confirm_dialog == QtWidgets.QMessageBox.Yes:
             self.db_manager.delete_data(self.table_name, item_id)
             self.refresh_data()
 
     def add_item(self):
-        column_names = [desc[1] for desc in self.data_description if desc[1] != 'id']
+        column_names = [desc[1] for desc in self.data_description]
         dialog = AddItemDialog(self.table_name, column_names)
         if dialog.exec_():
-            values = [line_edit.text() for line_edit in dialog.line_edits]
-            self.db_manager.insert_data(self.table_name, values)
-            self.refresh_data()
+            values = dialog.get_values()
+            if all(values):
+                self.db_manager.insert_data(self.table_name, values)
+                self.refresh_data()
 
     def edit_item(self):
         selected_rows = self.table_widget.selectionModel().selectedRows()
@@ -170,26 +173,22 @@ class AddItemDialog(QtWidgets.QDialog):
         self.setWindowTitle(f'Добавить запись в {table_name}')
         self.column_names = column_names
 
-        layout = QtWidgets.QVBoxLayout()
+        layout = QtWidgets.QFormLayout()
 
-        self.line_edits = []
+        self.line_edits = {}
         for column in column_names:
-            label = QtWidgets.QLabel(column)
             line_edit = QtWidgets.QLineEdit()
-            layout.addWidget(label)
-            layout.addWidget(line_edit)
-            self.line_edits.append(line_edit)
+            layout.addRow(column, line_edit)
+            self.line_edits[column] = line_edit
 
         add_button = QtWidgets.QPushButton('Добавить')
-        layout.addWidget(add_button)
-        add_button.clicked.connect(self.add_item)
+        layout.addRow(add_button)
+        add_button.clicked.connect(self.accept)
 
         self.setLayout(layout)
 
-    def add_item(self):
-        values = [line_edit.text() for line_edit in self.line_edits]
-        if all(values):
-            self.accept()
+    def get_values(self):
+        return [self.line_edits[column].text() for column in self.column_names]
 
 if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
