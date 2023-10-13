@@ -122,7 +122,7 @@ class TableDialog(QtWidgets.QDialog):
             return
 
         row = selected_indexes[0].row()
-        item_id = self.data[row][0]  # Assuming the first column is the ID
+        item_id = self.data[row][0]  # !!! первый столбец id
         confirm_dialog = QtWidgets.QMessageBox.question(self, 'Подтверждение удаления',
                                                         f'Вы уверены, что хотите удалить запись с ID {item_id}?',
                                                         QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
