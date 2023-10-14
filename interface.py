@@ -67,7 +67,7 @@ class MainWindow(QtWidgets.QWidget):
         data_description = self.get_data_description(table_name)
         data = self.db_manager.get_data(table_name)
         dialog = TableDialog(table_name, data, data_description)
-        dialog.db_manager = self.db_manager  # Менеджер БД в диалоговое окно
+        dialog.db_manager = self.db_manager
         dialog.exec_()
 
     def get_data_description(self, table_name):
@@ -117,24 +117,22 @@ class TableDialog(QtWidgets.QDialog):
         self.setLayout(layout)
 
     def delete_item(self):
-        selected_indexes = self.table_widget.selectionModel().selectedIndexes()
-        if not selected_indexes:
-            return
+        selected_item = self.table_widget.currentItem()
+        if selected_item is not None:
+            row = selected_item.row()
+            item_id = self.data[row][0]  # Assuming the first column is the ID
+            confirm_dialog = QtWidgets.QMessageBox.question(self, 'Подтверждение удаления',
+                                                            f'Вы уверены, что хотите удалить запись с ID {item_id}?',
+                                                            QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
+                                                            QtWidgets.QMessageBox.No)
 
-        row = selected_indexes[0].row()
-        item_id = self.data[row][0]  # !!! первый столбец id
-        confirm_dialog = QtWidgets.QMessageBox.question(self, 'Подтверждение удаления',
-                                                        f'Вы уверены, что хотите удалить запись с ID {item_id}?',
-                                                        QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
-                                                        QtWidgets.QMessageBox.No)
-
-        if confirm_dialog == QtWidgets.QMessageBox.Yes:
-            self.db_manager.delete_data(self.table_name, item_id)
-            self.refresh_data()
+            if confirm_dialog == QtWidgets.QMessageBox.Yes:
+                self.db_manager.delete_data(self.table_name, item_id)
+                self.refresh_data()
 
     def add_item(self):
         column_names = [desc[1] for desc in self.data_description]
-        dialog = AddItemDialog(self.table_name, column_names)
+        dialog = AddItemDialog(column_names)
         if dialog.exec_():
             values = dialog.get_values()
             if all(values):
@@ -142,17 +140,17 @@ class TableDialog(QtWidgets.QDialog):
                 self.refresh_data()
 
     def edit_item(self):
-        selected_rows = self.table_widget.selectionModel().selectedRows()
-        if not selected_rows:
-            return
-
-        item_id = self.data[selected_rows[0].row()][0]  # !!! первый столбец id
-        column_names = [desc[1] for desc in self.data_description if desc[1] != 'id']
-        dialog = AddItemDialog(self.table_name, column_names)
-        if dialog.exec_():
-            values = [line_edit.text() for line_edit in dialog.line_edits]
-            self.db_manager.update_data(self.table_name, dict(zip(column_names, values)), item_id)
-            self.refresh_data()
+        selected_item = self.table_widget.currentItem()
+        if selected_item is not None:
+            row = selected_item.row()
+            item_id = self.data[row][0]  # Assuming the first column is the ID
+            column_names = [desc[1] for desc in self.data_description]
+            values = self.data[row][1:]  # Exclude the ID column value
+            dialog = EditItemDialog(column_names, values)
+            if dialog.exec_():
+                updated_values = dialog.get_values()
+                self.db_manager.update_data(self.table_name, dict(zip(column_names, updated_values)), item_id)
+                self.refresh_data()
 
     def refresh_data(self):
         self.data = self.db_manager.get_data(self.table_name)
@@ -168,27 +166,63 @@ class TableDialog(QtWidgets.QDialog):
                 self.table_widget.setItem(i, j, QtWidgets.QTableWidgetItem(str(item)))
 
 class AddItemDialog(QtWidgets.QDialog):
-    def __init__(self, table_name, column_names):
+    def __init__(self, column_names):
         super().__init__()
-        self.setWindowTitle(f'Добавить запись в {table_name}')
+        self.setWindowTitle('Добавить запись')
         self.column_names = column_names
 
-        layout = QtWidgets.QFormLayout()
+        layout = QtWidgets.QVBoxLayout()
 
-        self.line_edits = {}
+        self.line_edits = []
         for column in column_names:
+            label = QtWidgets.QLabel(column)
             line_edit = QtWidgets.QLineEdit()
-            layout.addRow(column, line_edit)
-            self.line_edits[column] = line_edit
+            layout.addWidget(label)
+            layout.addWidget(line_edit)
+            self.line_edits.append(line_edit)
 
         add_button = QtWidgets.QPushButton('Добавить')
-        layout.addRow(add_button)
+        layout.addWidget(add_button)
         add_button.clicked.connect(self.accept)
+
+        cancel_button = QtWidgets.QPushButton('Отмена')
+        layout.addWidget(cancel_button)
+        cancel_button.clicked.connect(self.reject)
 
         self.setLayout(layout)
 
     def get_values(self):
-        return [self.line_edits[column].text() for column in self.column_names]
+        return [line_edit.text() for line_edit in self.line_edits]
+
+class EditItemDialog(QtWidgets.QDialog):
+    def __init__(self, column_names, current_values):
+        super().__init__()
+        self.setWindowTitle('Изменить запись')
+        self.column_names = column_names
+
+        layout = QtWidgets.QVBoxLayout()
+
+        self.line_edits = []
+        for column, current_value in zip(column_names, current_values):
+            label = QtWidgets.QLabel(column)
+            line_edit = QtWidgets.QLineEdit(current_value)
+            layout.addWidget(label)
+            layout.addWidget(line_edit)
+            self.line_edits.append(line_edit)
+
+        add_button = QtWidgets.QPushButton('Сохранить')
+        layout.addWidget(add_button)
+        add_button.clicked.connect(self.accept)
+
+        cancel_button = QtWidgets.QPushButton('Отмена')
+        layout.addWidget(cancel_button)
+        cancel_button.clicked.connect(self.reject)
+
+        self.setLayout(layout)
+
+    def get_values(self):
+        return [line_edit.text() for line_edit in self.line_edits]
+
 
 if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
