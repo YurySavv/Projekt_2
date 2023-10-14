@@ -64,7 +64,7 @@ class MainWindow(QtWidgets.QWidget):
 
     def show_main_menu(self):
         # Показать основное меню приложения и передать self.employee_id в окна, где это необходимо
-        pass  # Реализуйте логику отображения основного меню
+        pass  # Реализовать логику отображения основного меню
 
 if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
