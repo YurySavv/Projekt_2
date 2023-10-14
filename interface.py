@@ -1,6 +1,8 @@
 import sys
 import sqlite3
 from PyQt5 import QtWidgets
+from operations import Ui_Dialog_edo
+from functools import partial
 
 class DatabaseManager:
     def __init__(self, db_name):
@@ -32,6 +34,8 @@ class DatabaseManager:
         self.conn.close()
 
 class MainWindow(QtWidgets.QWidget):
+    user_id = 2  # id пользователя
+
     def __init__(self):
         super().__init__()
         self.initUI()
@@ -43,6 +47,7 @@ class MainWindow(QtWidgets.QWidget):
         warehouses_button = QtWidgets.QPushButton('Склады')
         clients_button = QtWidgets.QPushButton('Клиенты')
         orders_button = QtWidgets.QPushButton('Заказы')
+        operations_button = QtWidgets.QPushButton('ЭДО')
 
         button_width = 200
         button_height = 60
@@ -50,18 +55,29 @@ class MainWindow(QtWidgets.QWidget):
         warehouses_button.setFixedSize(button_width, button_height)
         clients_button.setFixedSize(button_width, button_height)
         orders_button.setFixedSize(button_width, button_height)
+        operations_button.setFixedSize(button_width, button_height)
 
         layout.addWidget(products_button)
         layout.addWidget(warehouses_button)
         layout.addWidget(clients_button)
         layout.addWidget(orders_button)
+        layout.addWidget(operations_button)
 
         products_button.clicked.connect(lambda: self.show_table_dialog('Products'))
         warehouses_button.clicked.connect(lambda: self.show_table_dialog('Warehouses'))
         clients_button.clicked.connect(lambda: self.show_table_dialog('Customers'))
         orders_button.clicked.connect(lambda: self.show_table_dialog('Orders'))
+        operations_button.clicked.connect(partial(self.show_table, self.user_id))
 
         self.setLayout(layout)
+
+    def show_table(self, arg1):
+        Dialog = QtWidgets.QDialog()
+        ui_table = Ui_Dialog_edo()
+        ui_table.user_id = arg1
+        ui_table.setupUi(Dialog)
+        Dialog.show()
+        Dialog.exec_()
 
     def show_table_dialog(self, table_name):
         data_description = self.get_data_description(table_name)

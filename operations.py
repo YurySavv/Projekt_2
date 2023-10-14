@@ -65,6 +65,7 @@ dict_coord_m = {0: [[80, 50, 111, 31], [60, 170, 111, 31], [60, 140, 111, 31]],
 
 
 class Ui_Dialog_edo(object):
+    user_id = ''
     def setupUi(self, Dialog):
         Dialog.setObjectName("Dialog")
         Dialog.resize(824, 273)
@@ -90,22 +91,24 @@ self.QPushButton_{x1+4}.setObjectName("pushButton_{x1+4}")
     def retranslateUi(self, Dialog):
         _translate = QtCore.QCoreApplication.translate
         Dialog.setWindowTitle(_translate("Dialog", "Dialog"))
+        print(self.user_id)
         for x2 in range(len(list(d1.keys()))):
             a1 = f""" 
 self.QLabel_{x2}.setText(_translate("Dialog", list(d1.keys())[{x2}]))
 self.QPushButton_{x2}.setText(_translate("Dialog", "Создание"))
 self.QPushButton_{x2}.clicked.connect(Dialog.close)
-self.QPushButton_{x2}.clicked.connect(partial(self.add_edo, f'{list(d1.keys())[x2]}'))
+self.QPushButton_{x2}.clicked.connect(partial(self.add_edo, f'{list(d1.keys())[x2]}', {self.user_id}))
 self.QPushButton_{x2+4}.setText(_translate("Dialog", "Просмотр"))
 self.QPushButton_{x2+4}.clicked.connect(Dialog.close)
 self.QPushButton_{x2+4}.clicked.connect(partial(self.show_table, "Documents",f'{list(d1.keys())[x2]}'))
 """
             exec(a1)
 
-    def add_edo(self, arg1):
+    def add_edo(self, arg1, arg2):
         Dialog = QtWidgets.QDialog()
         ui_table = Ui_Dialog_edo_1()
         ui_table.table_name = arg1
+        ui_table.user_id = arg2
         ui_table.setupUi(Dialog)
         Dialog.show()
         Dialog.exec_()
@@ -121,6 +124,7 @@ self.QPushButton_{x2+4}.clicked.connect(partial(self.show_table, "Documents",f'{
 
 
 class Ui_Dialog_edo_1(object):
+    user_id = ''
     table_name = 'Списание_товара'
     list_rows = []
 
@@ -203,7 +207,7 @@ self.QLabel_{x2}.setText(_translate("Dialog", label_dict[self.table_name][{x2}])
 
     def add_edo(self):
         try:
-            gen_edo(self.table_name, self.list_rows, 6)
+            gen_edo(self.table_name, self.list_rows, self.user_id)
         except:
             pass
 
