@@ -16,9 +16,9 @@ class DatabaseManager:
         self.cursor.execute(f"DELETE FROM {table_name} WHERE id=?", (item_id,))
         self.conn.commit()
 
-    def insert_data(self, table_name, values):
+    def insert_data(self, table_name, values, column_name):
         placeholders = ', '.join(['?'] * len(values))
-        query = f"INSERT INTO {table_name} VALUES ({placeholders})"
+        query = f"INSERT INTO {table_name} {tuple(column_name)} VALUES ({placeholders})"
         self.cursor.execute(query, values)
         self.conn.commit()
 
@@ -131,12 +131,12 @@ class TableDialog(QtWidgets.QDialog):
                 self.refresh_data()
 
     def add_item(self):
-        column_names = [desc[1] for desc in self.data_description]
+        column_names = [desc[1] for desc in self.data_description if desc[1] != 'id']
         dialog = AddItemDialog(column_names)
         if dialog.exec_():
             values = dialog.get_values()
             if all(values):
-                self.db_manager.insert_data(self.table_name, values)
+                self.db_manager.insert_data(self.table_name, values, column_names)
                 self.refresh_data()
 
     def edit_item(self):
@@ -144,7 +144,7 @@ class TableDialog(QtWidgets.QDialog):
         if selected_item is not None:
             row = selected_item.row()
             item_id = self.data[row][0]  # Assuming the first column is the ID
-            column_names = [desc[1] for desc in self.data_description]
+            column_names = [desc[1] for desc in self.data_description if desc[1] != 'id']
             values = self.data[row][1:]  # Exclude the ID column value
             dialog = EditItemDialog(column_names, values)
             if dialog.exec_():
@@ -205,7 +205,7 @@ class EditItemDialog(QtWidgets.QDialog):
         self.line_edits = []
         for column, current_value in zip(column_names, current_values):
             label = QtWidgets.QLabel(column)
-            line_edit = QtWidgets.QLineEdit(current_value)
+            line_edit = QtWidgets.QLineEdit(str(current_value))
             layout.addWidget(label)
             layout.addWidget(line_edit)
             self.line_edits.append(line_edit)
